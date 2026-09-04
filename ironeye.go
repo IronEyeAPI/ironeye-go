@@ -40,11 +40,28 @@ var retryableStatus = map[int]bool{408: true, 425: true, 429: true, 500: true, 5
 // IRONEYE_API_KEY is set.
 type Option func(*Client)
 
-func WithAPIKey(key string) Option      { return func(c *Client) { c.apiKey = key } }
-func WithBaseURL(raw string) Option     { return func(c *Client) { c.baseURL = strings.TrimRight(raw, "/") } }
-func WithHTTPClient(h *http.Client) Option { return func(c *Client) { c.http = h } }
-func WithMaxRetries(n int) Option       { return func(c *Client) { c.maxRetries = n } }
-func WithLogger(l *slog.Logger) Option  { return func(c *Client) { c.log = l } }
+// One body per line rather than a block of one-liners: gofmt aligns consecutive
+// single-line declarations to their longest member, so adding an option with a
+// longer signature would silently reformat every line around it.
+func WithAPIKey(key string) Option {
+	return func(c *Client) { c.apiKey = key }
+}
+
+func WithBaseURL(raw string) Option {
+	return func(c *Client) { c.baseURL = strings.TrimRight(raw, "/") }
+}
+
+func WithHTTPClient(h *http.Client) Option {
+	return func(c *Client) { c.http = h }
+}
+
+func WithMaxRetries(n int) Option {
+	return func(c *Client) { c.maxRetries = n }
+}
+
+func WithLogger(l *slog.Logger) Option {
+	return func(c *Client) { c.log = l }
+}
 
 // WithHeader adds a header to every request. A per-call header of the same name
 // still wins.
