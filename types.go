@@ -83,11 +83,22 @@ type Input struct {
 	Filename  string `json:"filename,omitempty"`
 }
 
+// Audit is the position in the append-only chain that the request was
+// written to, not a single value: chain_id names the chain, head is the
+// digest after this entry, seq is how many entries precede it. It was
+// declared a string, and Go decodes strictly, so every successful response
+// failed to parse at the client.
+type AuditPosition struct {
+	ChainID string `json:"chain_id"`
+	Head    string `json:"head"`
+	Seq     int64  `json:"seq"`
+}
+
 type Provenance struct {
 	Modules   map[string]any `json:"modules"`
 	Degraded  []string       `json:"degraded"`
 	ElapsedMs float64        `json:"elapsed_ms"`
-	Audit     string         `json:"audit"`
+	Audit     AuditPosition  `json:"audit"`
 }
 
 type Retention struct {
@@ -164,8 +175,17 @@ type CollectionMeta struct {
 	SourceKind string  `json:"source_kind"`
 	DurationMs float64 `json:"duration_ms"`
 	Records    int     `json:"records"`
-	Attempts   int     `json:"attempts"`
-	Cached     bool    `json:"cached,omitempty"`
+	// Attempts is every source tried and how each one went, in order -- the
+	// reason a record came from the source it did. It was declared a count.
+	Attempts []Attempt `json:"attempts"`
+	Cached   bool      `json:"cached,omitempty"`
+}
+
+type Attempt struct {
+	Source  string `json:"source"`
+	Outcome string `json:"outcome"`
+	Reason  string `json:"reason,omitempty"`
+	Detail  string `json:"detail,omitempty"`
 }
 
 // Collection is the answer to a collection operation. Data is one record or an
